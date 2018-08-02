@@ -3,6 +3,9 @@
  * This way, we can import all of our components from the same place, rather than
  * having to figure out which file they belong to!
  */
-export {default as Navbar} from './navbar'
-export {default as UserHome} from './user-home'
-export {Login, Signup} from './auth-form'
+export {default as Navbar} from './boilerMaker/navbar'
+export {default as UserHome} from './boilerMaker/user-home'
+export {Login, Signup} from './boilerMaker/auth-form'
+export {default as Grid} from './grid/Grid'
+export {default as Board} from './grid/Board.jsx'
+export {default as Player} from './Player.jsx'

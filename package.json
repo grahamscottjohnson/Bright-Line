@@ -1,7 +1,7 @@
 {
-  "name": "boilermaker",
+  "name": "bright-line",
   "version": "1.0.0",
-  "description": "Some boilerplate code to get you started - get shakin'!",
+  "description": "Grid puzzle game",
   "engines": {
     "node": ">= 7.0.0"
   },
@@ -33,7 +33,7 @@
       "git add"
     ]
   },
-  "author": "Fullstack Academy of Code",
+  "author": "Graham Johnson",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.15.3",
@@ -47,6 +47,7 @@
     "passport-google-oauth": "^1.0.0",
     "pg": "^6.1.2",
     "pg-hstore": "^2.3.2",
+    "phaser": "^3.11.0",
     "prop-types": "^15.5.8",
     "react": "^16.3.1",
     "react-dom": "^16.0.0",
