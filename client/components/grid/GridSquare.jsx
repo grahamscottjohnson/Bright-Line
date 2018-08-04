@@ -1,6 +1,6 @@
 import React from 'react'
 
-const GridSquare = ({origin = [0, 0], i, j}) => {
+const GridSquare = ({origin = [0, 0], i, j, color}) => {
   return (
     <polyline
       points={[
@@ -10,7 +10,7 @@ const GridSquare = ({origin = [0, 0], i, j}) => {
         [j.x, -j.y],
         [0, 0]
       ]}
-      style={{fill: 'red', stroke: 'black', strokeWidth: 1}}
+      style={{fill: 'none', stroke: color, strokeWidth: 1}}
       transform={`translate(${origin[0]} ${-1 * origin[1]})`}
     />
   )

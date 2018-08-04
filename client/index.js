@@ -5,7 +5,7 @@ import {Router} from 'react-router-dom'
 import history from './history'
 import store from './store'
 import App from './app'
-import {moveXBackwards, moveX, moveY, moveYBackwards} from './store/player'
+import {moveIBackwards, moveI, moveJ, moveJBackwards} from './store/player'
 
 // establishes socket connection
 import './socket'
@@ -23,16 +23,16 @@ document.addEventListener('keydown', event => {
   const {i, j} = store.getState()
   switch (event.which) {
     case 87:
-      store.dispatch(moveY(i, j))
+      store.dispatch(moveJ(i, j))
       break
     case 68:
-      store.dispatch(moveX(i, j))
+      store.dispatch(moveI(i, j))
       break
     case 83:
-      store.dispatch(moveYBackwards(i, j))
+      store.dispatch(moveJBackwards(i, j))
       break
     case 65:
-      store.dispatch(moveXBackwards(i, j))
+      store.dispatch(moveIBackwards(i, j))
       break
     default:
       break

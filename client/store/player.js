@@ -2,43 +2,43 @@
  * Action Types
  */
 
-export const MOVE_PLAYER_X = 'MOVE_PLAYER_X'
-export const MOVE_PLAYER_X_BACKWARDS = 'MOVE_PLAYER_X_BACKWARDS'
-export const MOVE_PLAYER_Y = 'MOVE_PLAYER_Y'
-export const MOVE_PLAYER_Y_BACKWARDS = 'MOVE_PLAYER_Y_BACKWARDS'
+export const MOVE_PLAYER_I = 'MOVE_PLAYER_I'
+export const MOVE_PLAYER_I_BACKWARDS = 'MOVE_PLAYER_I_BACKWARDS'
+export const MOVE_PLAYER_J = 'MOVE_PLAYER_J'
+export const MOVE_PLAYER_J_BACKWARDS = 'MOVE_PLAYER_J_BACKWARDS'
 export const SET_PLAYER_POSITION = 'SET_PLAYER_POSITION'
 
 /*
  * Action Creators
  */
 
-export const moveX = (i, j) => {
+export const moveI = (i, j) => {
   return {
-    type: MOVE_PLAYER_X,
+    type: MOVE_PLAYER_I,
     i,
     j
   }
 }
 
-export const moveXBackwards = (i, j) => {
+export const moveIBackwards = (i, j) => {
   return {
-    type: MOVE_PLAYER_X_BACKWARDS,
+    type: MOVE_PLAYER_I_BACKWARDS,
     i,
     j
   }
 }
 
-export const moveY = (i, j) => {
+export const moveJ = (i, j) => {
   return {
-    type: MOVE_PLAYER_Y,
+    type: MOVE_PLAYER_J,
     i,
     j
   }
 }
 
-export const moveYBackwards = (i, j) => {
+export const moveJBackwards = (i, j) => {
   return {
-    type: MOVE_PLAYER_Y_BACKWARDS,
+    type: MOVE_PLAYER_J_BACKWARDS,
     i,
     j
   }
@@ -65,14 +65,14 @@ const initialState = {x: 0, y: 0}
 const player = (state = initialState, action) => {
   const {i, j} = action
   switch (action.type) {
-    case MOVE_PLAYER_X:
-      return {...state, x: state.x + i.x + j.x}
-    case MOVE_PLAYER_X_BACKWARDS:
-      return {...state, x: state.x - i.x - j.x}
-    case MOVE_PLAYER_Y:
-      return {...state, y: state.y + i.y + j.y}
-    case MOVE_PLAYER_Y_BACKWARDS:
-      return {...state, y: state.y - i.y - j.y}
+    case MOVE_PLAYER_I:
+      return {...state, x: state.x + i.x, y: state.y + i.y}
+    case MOVE_PLAYER_I_BACKWARDS:
+      return {...state, x: state.x - i.x, y: state.y - i.y}
+    case MOVE_PLAYER_J:
+      return {...state, x: state.x + j.x, y: state.y + j.y}
+    case MOVE_PLAYER_J_BACKWARDS:
+      return {...state, x: state.x - j.x, y: state.y - j.y}
     case SET_PLAYER_POSITION:
       return {...state, x: action.x, y: action.y}
     default:

@@ -15,13 +15,20 @@ export default class Grid extends Component {
     const axis = this.makeAxis(3)
     const i = this.props.i
     const j = this.props.j
+    const color = this.props.color
     return (
       <Fragment>
         {axis.map(x => {
           return axis.map(y => {
             const origin = [i.x * x + j.x * y, i.y * x + j.y * y]
             return (
-              <GridSquare key={[x, y].toString()} origin={origin} i={i} j={j} />
+              <GridSquare
+                key={[x, y].toString()}
+                origin={origin}
+                i={i}
+                j={j}
+                color={color}
+              />
             )
           })
         })}

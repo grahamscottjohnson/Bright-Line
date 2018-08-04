@@ -7,7 +7,7 @@ const Arrow = ({x, y, color = 'orange'}) => {
         [0, 0],
         [x, -y] //more points for tip but later
       ]}
-      style={{fill: color, stroke: color, strokeWidth: 3}}
+      style={{fill: color, stroke: color, strokeWidth: 5}}
     />
   )
 }
