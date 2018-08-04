@@ -6,8 +6,9 @@ import i from './i'
 import j from './j'
 import player from './player'
 import level from './level'
+import size from './size'
 
-const reducer = combineReducers({i, j, player, level})
+const reducer = combineReducers({i, j, player, level, size})
 const middleware = composeWithDevTools(
   applyMiddleware(thunkMiddleware, createLogger({collapsed: true}))
 )

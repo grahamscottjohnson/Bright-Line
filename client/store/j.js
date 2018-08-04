@@ -20,7 +20,7 @@ export const setJ = (x, y) => {
  * Initial State
  */
 
-const initialState = {x: 0, y: 50}
+const initialState = {x: 0, y: 1}
 
 /*
  * Reducer

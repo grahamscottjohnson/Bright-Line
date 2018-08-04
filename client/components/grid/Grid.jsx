@@ -44,5 +44,6 @@ Grid.defaultProps = {
 
 Grid.propTypes = {
   i: PropTypes.object,
-  j: PropTypes.object
+  j: PropTypes.object,
+  color: PropTypes.string
 }

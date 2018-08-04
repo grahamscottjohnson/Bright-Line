@@ -9,58 +9,6 @@ import {setI} from '../../store/i'
 import {setJ} from '../../store/j'
 
 /*
- * Helper Functions
- */
-
-const distance = (v1, v2) => {
-  const side = Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)
-  return Math.pow(side, 0.5)
-}
-
-const isClose = (v, clickVector) => {
-  return distance(v, clickVector) < 20
-}
-
-const getVector = event => {
-  const result = {
-    x: event.clientX - 300 - 8, //8 is because of margin,
-    y: 300 - event.clientY + 8
-  }
-  return result
-}
-
-const getClosest = (newPoint, key) => {
-  const hundDigit = Math.floor(newPoint[key] / 100)
-  const fifties = [hundDigit * 100, hundDigit * 100 + 50, hundDigit * 100 + 100]
-  const mappedFifties = fifties.map(val => Math.abs(newPoint[key] - val))
-  const goodIndex = mappedFifties.indexOf(Math.min(...mappedFifties))
-  const result = fifties[goodIndex]
-  console.log(
-    `getClosest`,
-    hundDigit,
-    Math.min(...mappedFifties),
-    mappedFifties,
-    goodIndex,
-    fifties,
-    result
-  )
-  return result
-}
-
-const getPoint = (newPoint, oldPoint, board) => {
-  //board is so that I don't have to hard code it
-  const x = getClosest(newPoint, 'x')
-  const y = getClosest(newPoint, 'y')
-  const maybeResult = {x, y}
-  const result = isClose(maybeResult, newPoint) ? maybeResult : oldPoint
-  console.log(`getPoint`, maybeResult, result)
-  return result
-}
-const isPlayerAtOrigin = player => {
-  return player.x === 0 && player.y === 0
-}
-
-/*
  * Component
  */
 
@@ -76,39 +24,92 @@ class Board extends Component {
     this.handleDown = this.handleDown.bind(this)
     this.handleUp = this.handleUp.bind(this)
   }
+
+  /*
+ * Arrow Drag functions
+ */
+
   handleDown(event) {
     //convert event vals into coord
     const player = this.props.player
-    console.log(`handleDown:`, isPlayerAtOrigin(player))
-    const clickVector = getVector(event)
     if (
-      isClose(this.props.i, clickVector) &&
-      isPlayerAtOrigin(this.props.player)
+      event.target.className.baseVal === 'i-point' &&
+      this.isPlayerAtOrigin(this.props.player)
     ) {
       this.setState({isDragging: true, oldPoint: this.props.i, vector: 'i'})
-    } else if (isClose(this.props.j, clickVector) && isPlayerAtOrigin(player)) {
+    } else if (
+      event.target.className.baseVal === 'j-point' &&
+      this.isPlayerAtOrigin(player)
+    ) {
       this.setState({isDragging: true, oldPoint: this.props.j, vector: 'j'})
     }
   }
   handleMove(event) {
-    if (this.state.isDragging) {
-      //convert vals into coord
-      const clickVector = getVector(event)
+    if (this.state.isDragging && event.target.className.baseVal === 'board') {
+      const clickVector = this.getVector(event)
       this.props.setVector(this.state.vector, clickVector)
     }
   }
   handleUp(event) {
-    const newState = {
-      isDragging: false,
-      vector: ''
-    }
     if (this.state.vector) {
-      //convert event
-      const clickVector = getVector(event)
-      const newPoint = getPoint(clickVector, this.state.oldPoint, {}) //board
+      const clickVector = this.props[this.state.vector]
+      const newPoint = this.validatePoint(clickVector, this.state.oldPoint, {}) //board
       this.props.setVector(this.state.vector, newPoint)
     }
-    this.setState(newState)
+    this.setState({
+      isDragging: false,
+      vector: ''
+    })
+  }
+
+  /*
+ * Helper Functions
+ */
+  getVector(event) {
+    //expects to be run from the overall board object for the right offset
+    const rect = event.target.getBoundingClientRect()
+    const clickPositionX = event.clientX - rect.left
+    const clickPositionY = event.clientY - rect.top
+    const size = this.props.size
+    const x = clickPositionX - size / 2
+    const y = size / 2 - clickPositionY
+    const vector = {x, y}
+    return this.scaleVector(vector, 12 / size)
+  }
+  distance(v1, v2) {
+    const side = Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)
+    return Math.pow(side, 0.5)
+  }
+
+  isClose(v, clickVector) {
+    return this.distance(v, clickVector) < 0.4
+  }
+
+  getClosest(point) {
+    //ex: {x:.8, y:.2} => {x:1, y:0}
+    const resultPoint = {}
+    Object.keys(point).forEach(dimension => {
+      resultPoint[dimension] = Math.round(point[dimension])
+    })
+    return resultPoint
+  }
+
+  validatePoint(newPoint, oldPoint, board) {
+    //board is so that I don't have to hard code it
+    const maybeResult = this.getClosest(newPoint)
+    const result = this.isClose(maybeResult, newPoint) ? maybeResult : oldPoint
+    return result
+  }
+  isPlayerAtOrigin(player) {
+    return player.x === 0 && player.y === 0
+  }
+
+  scaleVector(vector, scalar) {
+    const newVector = {}
+    Object.keys(vector).forEach(dimension => {
+      newVector[dimension] = vector[dimension] * scalar
+    })
+    return newVector
   }
 
   /*
@@ -116,16 +117,17 @@ class Board extends Component {
  */
 
   render() {
-    const size = 600
-    const i = this.props.i
-    const j = this.props.j
+    const size = this.props.size
+    const i = this.scaleVector(this.props.i, Math.round(size / 12))
+    const j = this.scaleVector(this.props.j, Math.round(size / 12))
     const player = this.props.player
-    const playerX = player.x
-    const playerY = player.y
+    const playerX = player.x * Math.round(size / 12)
+    const playerY = player.y * Math.round(size / 12)
     const quadrantLength = size / 2
     const blocks = this.props.blocks || []
     return (
       <svg
+        className="board"
         height={size}
         width={size}
         xmlns="http://www.w3.org/2000/svg"
@@ -135,21 +137,27 @@ class Board extends Component {
       >
         <g transform={`translate(${quadrantLength} ${quadrantLength})`}>
           {/* Base grid for reference */}
-          <Grid color="ddd" />
+          <Grid
+            i={this.scaleVector({x: 1, y: 0}, Math.round(size / 12))}
+            j={this.scaleVector({x: 0, y: 1}, Math.round(size / 12))}
+            color="ddd"
+          />
 
           {/* Grid that player can bend */}
           <Grid i={i} j={j} color="black" />
 
           {/* i and j vectors */}
           <Arrow
+            name="i"
             x={i.x}
             y={i.y}
-            color={isPlayerAtOrigin(player) ? '0f0' : '0a0'}
+            color={this.isPlayerAtOrigin(player) ? '0f0' : '0a0'}
           />
           <Arrow
+            name="j"
             x={j.x}
             y={j.y}
-            color={isPlayerAtOrigin(player) ? 'f00' : 'a00'}
+            color={this.isPlayerAtOrigin(player) ? 'f00' : 'a00'}
           />
 
           {/* Designate Origin */}
@@ -164,7 +172,7 @@ class Board extends Component {
                 key={[block.x, block.y].toString()}
                 x={block.x}
                 y={block.y}
-                size={30}
+                size={Math.round(size / 20)}
               />
             )
           })}
@@ -181,7 +189,8 @@ const mapState = state => {
     player: state.player,
     // playerX: state.player.x,
     // playerY: state.player.y,
-    blocks: state.level.blocks
+    blocks: state.level.blocks,
+    size: state.size
   }
 }
 
@@ -203,12 +212,13 @@ export default connect(mapState, mapDispatch)(Board)
  * Prop Settings
  */
 
-// Board.defaultProps = {
-//   i: {x: 20, y: 0},
-//   j: {x: 0, y: 20},
-//   playerX: 0,
-//   playerY: 0
-// }
+Board.defaultProps = {
+  i: {x: 1, y: 0},
+  j: {x: 0, y: 1},
+  playerX: 0,
+  playerY: 0,
+  size: 600
+}
 
 // Board.propTypes = {
 //   i: PropTypes.object,

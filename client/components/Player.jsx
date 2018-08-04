@@ -1,7 +1,14 @@
 import React from 'react'
+import {connect} from 'react-redux'
 
-const Player = ({x, y}) => {
-  return <circle cx={x} cy={-y} r="10" fill="yellow" />
+const Player = ({x, y, size}) => {
+  return <circle cx={x} cy={-y} r={size / 60} fill="yellow" />
 }
 
-export default Player
+const mapState = state => {
+  return {
+    size: state.size
+  }
+}
+
+export default connect(mapState)(Player)
