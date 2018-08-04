@@ -2,7 +2,9 @@ import React from 'react'
 import {connect} from 'react-redux'
 
 const Player = ({x, y, size}) => {
-  return <circle cx={x} cy={-y} r={size / 60} fill="yellow" />
+  return (
+    <circle className="player" cx={x} cy={-y} r={size / 60} fill="yellow" />
+  )
 }
 
 const mapState = state => {

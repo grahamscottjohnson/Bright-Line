@@ -7,6 +7,8 @@ import {connect} from 'react-redux'
 import Block from './Block'
 import {setI} from '../../store/i'
 import {setJ} from '../../store/j'
+import Door from './Door'
+import Key from './Key'
 
 /*
  * Component
@@ -53,7 +55,9 @@ class Board extends Component {
   handleUp(event) {
     if (this.state.vector) {
       const clickVector = this.props[this.state.vector]
-      const newPoint = this.validatePoint(clickVector, this.state.oldPoint, {}) //board
+      //scaling because validatePoint is easier when it's the redux coordinate
+      const scaledVector = scaleVector(clickVector, 12 / this.props.size)
+      const newPoint = this.validatePoint(scaledVector, this.state.oldPoint, {}) //board
       this.props.setVector(this.state.vector, newPoint)
     }
     this.setState({
@@ -74,7 +78,7 @@ class Board extends Component {
     const x = clickPositionX - size / 2
     const y = size / 2 - clickPositionY
     const vector = {x, y}
-    return this.scaleVector(vector, 12 / size)
+    return vector
   }
   distance(v1, v2) {
     const side = Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)
@@ -94,22 +98,15 @@ class Board extends Component {
     return resultPoint
   }
 
-  validatePoint(newPoint, oldPoint, board) {
-    //board is so that I don't have to hard code it
+  validatePoint(newPoint, oldPoint) {
     const maybeResult = this.getClosest(newPoint)
-    const result = this.isClose(maybeResult, newPoint) ? maybeResult : oldPoint
+    const result = this.isClose(maybeResult, newPoint)
+      ? scaleVector(maybeResult, this.props.size / 12)
+      : oldPoint
     return result
   }
   isPlayerAtOrigin(player) {
     return player.x === 0 && player.y === 0
-  }
-
-  scaleVector(vector, scalar) {
-    const newVector = {}
-    Object.keys(vector).forEach(dimension => {
-      newVector[dimension] = vector[dimension] * scalar
-    })
-    return newVector
   }
 
   /*
@@ -118,13 +115,15 @@ class Board extends Component {
 
   render() {
     const size = this.props.size
-    const i = this.scaleVector(this.props.i, Math.round(size / 12))
-    const j = this.scaleVector(this.props.j, Math.round(size / 12))
+    const i = this.props.i
+    const j = this.props.j
     const player = this.props.player
-    const playerX = player.x * Math.round(size / 12)
-    const playerY = player.y * Math.round(size / 12)
+    const playerX = player.x
+    const playerY = player.y
     const quadrantLength = size / 2
     const blocks = this.props.blocks || []
+    const door = this.props.door || {}
+    const levelKey = this.props.levelKey || {}
     return (
       <svg
         className="board"
@@ -138,13 +137,14 @@ class Board extends Component {
         <g transform={`translate(${quadrantLength} ${quadrantLength})`}>
           {/* Base grid for reference */}
           <Grid
-            i={this.scaleVector({x: 1, y: 0}, Math.round(size / 12))}
-            j={this.scaleVector({x: 0, y: 1}, Math.round(size / 12))}
+            i={scaleVector({x: 1, y: 0}, Math.round(size / 12))}
+            j={scaleVector({x: 0, y: 1}, Math.round(size / 12))}
             color="ddd"
+            bound={3}
           />
 
           {/* Grid that player can bend */}
-          <Grid i={i} j={j} color="black" />
+          <Grid i={i} j={j} color="black" bound={3} />
 
           {/* i and j vectors */}
           <Arrow
@@ -163,9 +163,8 @@ class Board extends Component {
           {/* Designate Origin */}
           <circle cx="0" cy="0" r="3" fill="blue" />
 
-          <Player x={playerX} y={playerY} />
-
-          {/* If any blocks */}
+          <Door x={door.x} y={door.y} />
+          {!this.props.hasKey && <Key x={levelKey.x} y={levelKey.y} />}
           {blocks.map(block => {
             return (
               <Block
@@ -176,33 +175,51 @@ class Board extends Component {
               />
             )
           })}
+          <Player x={playerX} y={playerY} />
         </g>
       </svg>
     )
   }
 }
 
+function scaleVector(vector, scalar) {
+  const newVector = {}
+  Object.keys(vector).forEach(dimension => {
+    newVector[dimension] = vector[dimension] * scalar
+  })
+  return newVector
+}
+
 const mapState = state => {
+  const size = state.size
   return {
-    i: state.i,
-    j: state.j,
-    player: state.player,
+    i: scaleVector(state.i, Math.round(size / 12)),
+    j: scaleVector(state.j, Math.round(size / 12)),
+    player: scaleVector(state.player, Math.round(size / 12)),
     // playerX: state.player.x,
     // playerY: state.player.y,
-    blocks: state.level.blocks,
-    size: state.size
+    blocks: state.level.blocks.map(block =>
+      scaleVector(block, Math.round(size / 12))
+    ),
+    levelKey: scaleVector(state.level.key, Math.round(size / 12)),
+    door: scaleVector(state.level.door, Math.round(size / 12)),
+    hasKey: state.level.hasKey,
+    hasWon: state.level.hasWon,
+    size
   }
 }
 
 const mapDispatch = dispatch => {
   return {
-    setVector: (name, vector) => {
-      if (name === 'i') {
-        dispatch(setI(vector.x, vector.y))
-      } else if (name === 'j') {
-        dispatch(setJ(vector.x, vector.y))
-      }
-    }
+    setVector: (name, oldVector) =>
+      dispatch((_, getState) => {
+        const vector = scaleVector(oldVector, 12 / getState().size)
+        if (name === 'i') {
+          dispatch(setI(vector.x, vector.y))
+        } else if (name === 'j') {
+          dispatch(setJ(vector.x, vector.y))
+        }
+      })
   }
 }
 

@@ -12,7 +12,7 @@ export default class Grid extends Component {
     return result
   }
   render() {
-    const axis = this.makeAxis(3)
+    const axis = this.makeAxis(this.props.bound)
     const i = this.props.i
     const j = this.props.j
     const color = this.props.color
@@ -39,11 +39,13 @@ export default class Grid extends Component {
 
 Grid.defaultProps = {
   i: {x: 50, y: 0},
-  j: {x: 0, y: 50}
+  j: {x: 0, y: 50},
+  bound: 3
 }
 
 Grid.propTypes = {
   i: PropTypes.object,
   j: PropTypes.object,
-  color: PropTypes.string
+  color: PropTypes.string,
+  bound: PropTypes.number
 }

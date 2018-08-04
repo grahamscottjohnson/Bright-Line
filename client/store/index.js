@@ -5,14 +5,20 @@ import {composeWithDevTools} from 'redux-devtools-extension'
 import i from './i'
 import j from './j'
 import player from './player'
-import level from './level'
+import level, {setLevel} from './level'
 import size from './size'
+import unlocked from './unlocked'
+import bound from './bound'
 
-const reducer = combineReducers({i, j, player, level, size})
+const reducer = combineReducers({i, j, player, level, size, unlocked, bound})
 const middleware = composeWithDevTools(
   applyMiddleware(thunkMiddleware, createLogger({collapsed: true}))
 )
-const store = createStore(reducer, middleware)
+const makeStore = gameLevel => {
+  const store = createStore(reducer, middleware)
+  store.dispatch(setLevel(gameLevel))
+  return store
+}
 
-export default store
+export default makeStore
 export * from './user'

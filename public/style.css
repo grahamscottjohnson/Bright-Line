@@ -24,3 +24,7 @@ form div {
   display: block;
   margin: auto;
 }
+
+.player {
+  z-index: 1;
+}
