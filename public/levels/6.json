@@ -1,0 +1,21 @@
+{
+  "stage": 6,
+  "door": {
+    "x": 3,
+    "y": 0
+  },
+  "winsWithSwitch": true,
+  "trophy": {
+    "x": 0,
+    "y": -2
+  },
+  "blocks": [],
+  "switch": {
+    "i": 0,
+    "j": 2
+  },
+  "socket": {
+    "x": -2,
+    "y": 2
+  }
+}

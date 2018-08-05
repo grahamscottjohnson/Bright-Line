@@ -19,7 +19,7 @@ export const setSize = size => {
  * Initial State
  */
 
-const initialState = 300
+const initialState = 240
 
 /*
  * Reducer

@@ -18,10 +18,12 @@ export const setLevel = level => {
   }
 }
 
-export const updateLevel = player => {
+export const updateLevel = (player, i, j) => {
   return {
     type: UPDATE_LEVEL,
-    player
+    player,
+    i,
+    j
   }
 }
 
@@ -41,7 +43,7 @@ export const handlePlayer = action => {
     dispatch(action)
     const player = getState().player // getting the overall state here after we have combined reducers
     //instead: = getState().player
-    dispatch(updateLevel(player))
+    dispatch(updateLevel(player, action.i, action.j))
   }
 }
 
@@ -60,7 +62,17 @@ const level = (state = initialState, action) => {
     case SET_LEVEL:
       return action.level
     case UPDATE_LEVEL:
-      if (!state.hasKey && samePlace(state.key, action.player)) {
+      if (state.winsWithSwitch) {
+        const switchLocation = matrixMultiply(state.switch, action.i, action.j)
+        if (
+          samePlace(switchLocation, state.socket) &&
+          samePlace(state.door, action.player)
+        ) {
+          return {...state, hasWon: true}
+        } else {
+          return state
+        }
+      } else if (!state.hasKey && samePlace(state.key, action.player)) {
         return {...state, hasKey: true}
       } else if (state.hasKey && samePlace(state.door, action.player)) {
         return {...state, hasWon: true}
@@ -74,6 +86,25 @@ const level = (state = initialState, action) => {
 
 function samePlace(v1, v2) {
   return v1.x === v2.x && v1.y === v2.y
+}
+
+function scaleVector(vector, scalar) {
+  if (!vector) return {}
+  const newVector = {}
+  Object.keys(vector).forEach(dimension => {
+    newVector[dimension] = vector[dimension] * scalar
+  })
+  return newVector
+}
+
+function matrixMultiply(point, i, j) {
+  if (!point) return {}
+  const newI = scaleVector(i, point.i)
+  const newJ = scaleVector(j, point.j)
+  return {
+    x: newI.x + newJ.x,
+    y: newI.y + newJ.y
+  }
 }
 
 export default level

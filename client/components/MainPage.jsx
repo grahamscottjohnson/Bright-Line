@@ -21,7 +21,7 @@ class MainPage extends Component {
   }
 
   async componentDidMount() {
-    const numLevels = 2
+    const numLevels = 8
     const levelNums = []
     for (let i = 0; i <= numLevels; i += 1) {
       levelNums.push(i)
@@ -79,7 +79,7 @@ class MainPage extends Component {
   }
 
   render() {
-    const numLevels = 10
+    const numLevels = 8
     const levelNums = []
     for (let i = 0; i <= numLevels; i += 1) {
       levelNums.push(i)

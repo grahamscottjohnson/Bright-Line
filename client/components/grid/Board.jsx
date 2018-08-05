@@ -9,6 +9,8 @@ import {setI} from '../../store/i'
 import {setJ} from '../../store/j'
 import Door from './Door'
 import Key from './Key'
+import Switch from './Switch'
+import Socket from './Socket'
 
 /*
  * Component
@@ -34,15 +36,10 @@ class Board extends Component {
   handleDown(event) {
     //convert event vals into coord
     const player = this.props.player
-    if (
-      event.target.className.baseVal === 'i-point' &&
-      this.isPlayerAtOrigin(this.props.player)
-    ) {
+    const name = event.target.className.baseVal
+    if (name === 'i-point' && this.isPlayerAtOrigin(this.props.player)) {
       this.setState({isDragging: true, oldPoint: this.props.i, vector: 'i'})
-    } else if (
-      event.target.className.baseVal === 'j-point' &&
-      this.isPlayerAtOrigin(player)
-    ) {
+    } else if (name === 'j-point' && this.isPlayerAtOrigin(player)) {
       this.setState({isDragging: true, oldPoint: this.props.j, vector: 'j'})
     }
   }
@@ -114,16 +111,24 @@ class Board extends Component {
  */
 
   render() {
-    const size = this.props.size
-    const i = this.props.i
-    const j = this.props.j
-    const player = this.props.player
+    const {
+      size,
+      bound,
+      i,
+      j,
+      player,
+      blocks,
+      door,
+      levelKey,
+      hasKey,
+      winsWithSwitch,
+      levelSwitch,
+      socket
+    } = this.props
+    console.log(levelSwitch)
     const playerX = player.x
     const playerY = player.y
     const quadrantLength = size / 2
-    const blocks = this.props.blocks || []
-    const door = this.props.door || {}
-    const levelKey = this.props.levelKey || {}
     return (
       <svg
         className="board"
@@ -146,6 +151,26 @@ class Board extends Component {
           {/* Grid that player can bend */}
           <Grid i={i} j={j} color="black" bound={3} />
 
+          {/* Designate Origin */}
+          <circle cx="0" cy="0" r="3" fill="blue" />
+
+          <Door x={door.x} y={door.y} />
+          {blocks.map(block => {
+            return (
+              <Block
+                key={[block.x, block.y].toString()}
+                x={block.x}
+                y={block.y}
+                size={Math.round(size / 20)}
+              />
+            )
+          })}
+
+          {/* Decide wether to load key or switch depending on level */}
+          {!winsWithSwitch && !hasKey && <Key x={levelKey.x} y={levelKey.y} />}
+          {winsWithSwitch && <Switch x={levelSwitch.x} y={levelSwitch.y} />}
+          {winsWithSwitch && <Socket x={socket.x} y={socket.y} />}
+
           {/* i and j vectors */}
           <Arrow
             name="i"
@@ -160,21 +185,6 @@ class Board extends Component {
             color={this.isPlayerAtOrigin(player) ? 'f00' : 'a00'}
           />
 
-          {/* Designate Origin */}
-          <circle cx="0" cy="0" r="3" fill="blue" />
-
-          <Door x={door.x} y={door.y} />
-          {!this.props.hasKey && <Key x={levelKey.x} y={levelKey.y} />}
-          {blocks.map(block => {
-            return (
-              <Block
-                key={[block.x, block.y].toString()}
-                x={block.x}
-                y={block.y}
-                size={Math.round(size / 20)}
-              />
-            )
-          })}
           <Player x={playerX} y={playerY} />
         </g>
       </svg>
@@ -183,6 +193,7 @@ class Board extends Component {
 }
 
 function scaleVector(vector, scalar) {
+  if (!vector) return {}
   const newVector = {}
   Object.keys(vector).forEach(dimension => {
     newVector[dimension] = vector[dimension] * scalar
@@ -190,8 +201,19 @@ function scaleVector(vector, scalar) {
   return newVector
 }
 
+function matrixMultiply(point, i, j) {
+  if (!point) return {}
+  const newI = scaleVector(i, point.i)
+  const newJ = scaleVector(j, point.j)
+  return {
+    x: newI.x + newJ.x,
+    y: newI.y + newJ.y
+  }
+}
+
 const mapState = state => {
   const size = state.size
+  const switchAsXY = matrixMultiply(state.level.switch, state.i, state.j)
   return {
     i: scaleVector(state.i, Math.round(size / 12)),
     j: scaleVector(state.j, Math.round(size / 12)),
@@ -205,7 +227,11 @@ const mapState = state => {
     door: scaleVector(state.level.door, Math.round(size / 12)),
     hasKey: state.level.hasKey,
     hasWon: state.level.hasWon,
-    size
+    size,
+    bound: state.bound,
+    winsWithSwitch: !!state.level.winsWithSwitch,
+    levelSwitch: scaleVector(switchAsXY, Math.round(size / 12)),
+    socket: scaleVector(state.level.socket, Math.round(size / 12))
   }
 }
 
