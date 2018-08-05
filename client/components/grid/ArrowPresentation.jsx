@@ -1,6 +1,14 @@
 import React from 'react';
 
-const Arrow = ({x, y, color = 'orange', name = 'i', size}) => {
+const ArrowPresentation = ({
+  x,
+  y,
+  color = 'orange',
+  name = 'i',
+  size,
+  handleDown,
+  handleUp
+}) => {
   return (
     <React.Fragment>
       <polyline
@@ -14,11 +22,13 @@ const Arrow = ({x, y, color = 'orange', name = 'i', size}) => {
         className={`${name}-point`}
         cx={x}
         cy={-y}
-        r={size / 60}
+        r={size / 96}
         style={{fill: color}}
+        onMouseDown={handleDown}
+        onMouseUp={handleUp}
       />
     </React.Fragment>
   );
 };
 
-export default Arrow;
+export default ArrowPresentation;

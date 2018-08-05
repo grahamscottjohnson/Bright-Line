@@ -22,7 +22,7 @@ export const setSize = size => {
 //SIZE = unit length * (bound^2) * 2
 //UNIT LENGTH = SIZE / (2 * bound^2)
 
-const initialState = 720;
+const initialState = 648;
 
 /*
  * Reducer

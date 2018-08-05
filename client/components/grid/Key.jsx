@@ -1,22 +1,23 @@
-import React from 'react'
-import {connect} from 'react-redux'
+import React from 'react';
+import {connect} from 'react-redux';
 
-const Key = ({x, y, size}) => {
+const Key = ({x, y, keySize}) => {
   return (
     <rect
-      x={x - size / 2}
-      y={-y - size / 4}
-      width={size}
-      height={size / 2}
+      x={x - keySize / 2}
+      y={-y - keySize / 4}
+      width={keySize}
+      height={keySize / 2}
       fill="pink"
     />
-  )
-}
+  );
+};
 
 const mapState = state => {
+  const unitLength = state.size / (2 * state.bound * state.bound);
   return {
-    size: state.size / 20
-  }
-}
+    keySize: unitLength
+  };
+};
 
-export default connect(mapState)(Key)
+export default connect(mapState)(Key);

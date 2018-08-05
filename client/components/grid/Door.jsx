@@ -1,22 +1,23 @@
-import React from 'react'
-import {connect} from 'react-redux'
+import React from 'react';
+import {connect} from 'react-redux';
 
-const Door = ({x, y, size}) => {
+const Door = ({x, y, doorSize}) => {
   return (
     <rect
-      x={x - size / 2}
-      y={-y - size / 2}
-      width={size}
-      height={size}
+      x={x - doorSize / 2}
+      y={-y - doorSize / 2}
+      width={doorSize}
+      height={doorSize}
       fill="brown"
     />
-  )
-}
+  );
+};
 
 const mapState = state => {
+  const unitLength = state.size / (2 * state.bound * state.bound);
   return {
-    size: state.size / 20
-  }
-}
+    doorSize: unitLength
+  };
+};
 
-export default connect(mapState)(Door)
+export default connect(mapState)(Door);

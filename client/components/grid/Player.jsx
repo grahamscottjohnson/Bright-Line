@@ -1,16 +1,17 @@
-import React from 'react'
-import {connect} from 'react-redux'
+import React from 'react';
+import {connect} from 'react-redux';
 
-const Player = ({x, y, size}) => {
+const Player = ({x, y, playerSize}) => {
   return (
-    <circle className="player" cx={x} cy={-y} r={size / 60} fill="yellow" />
-  )
-}
+    <circle className="player" cx={x} cy={-y} r={playerSize} fill="yellow" />
+  );
+};
 
 const mapState = state => {
+  const unitLength = state.size / (2 * state.bound * state.bound);
   return {
-    size: state.size
-  }
-}
+    playerSize: unitLength / 3
+  };
+};
 
-export default connect(mapState)(Player)
+export default connect(mapState)(Player);

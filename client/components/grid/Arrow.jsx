@@ -1,5 +1,5 @@
-import React from 'react'
-import {connect} from 'react-redux'
+import React from 'react';
+import {connect} from 'react-redux';
 
 const Arrow = ({x, y, color = 'orange', name = 'i', size}) => {
   return (
@@ -15,16 +15,16 @@ const Arrow = ({x, y, color = 'orange', name = 'i', size}) => {
         className={`${name}-point`}
         cx={x}
         cy={-y}
-        r={size / 60}
+        r={size / 96}
         style={{fill: color}}
       />
     </React.Fragment>
-  )
-}
+  );
+};
 const mapState = state => {
   return {
     size: state.size
-  }
-}
+  };
+};
 
-export default connect(mapState)(Arrow)
+export default connect(mapState)(Arrow);

@@ -45,21 +45,16 @@ class Board extends Component {
     }
   }
   handleMove(event) {
-    if (this.state.isDragging && event.target.className.baseVal === 'board') {
-      const clickVector = this.getVector(event);
+    if (this.state.isDragging) {
+      const clickVector = this.getVector(event, event.currentTarget);
+      //&& event.target.className.baseVal === 'board' is no longer needed because of capture
       this.props.setVector(this.state.vector, clickVector);
     }
   }
   handleUp(event) {
     if (this.state.vector) {
-      const clickVector = this.props[this.state.vector];
-      //scaling because validatePoint is easier when it's the redux coordinate
-      const scaledVector = scaleVector(clickVector, 12 / this.props.size);
-      const newPoint = this.validatePoint(
-        scaledVector,
-        this.state.oldPoint,
-        {}
-      ); //board
+      const clickVector = this.getVector(event, event.currentTarget);
+      const newPoint = this.validatePoint(clickVector, this.state.oldPoint);
       this.props.setVector(this.state.vector, newPoint);
     }
     this.setState({
@@ -71,16 +66,12 @@ class Board extends Component {
   /*
  * Helper Functions
  */
-  getVector(event) {
-    //expects to be run from the overall board object for the right offset
-    const rect = event.target.getBoundingClientRect();
-    const clickPositionX = event.clientX - rect.left;
-    const clickPositionY = event.clientY - rect.top;
-    const size = this.props.size;
-    const x = clickPositionX - size / 2;
-    const y = size / 2 - clickPositionY;
-    const vector = {x, y};
-    return vector;
+
+  getVector(event, currentTarget) {
+    const rect = currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left - this.props.size / 2; //x position on the React coordinate Grid
+    const y = this.props.size / 2 - (event.clientY - rect.top); //y position on the React coordinate Grid
+    return {x, y};
   }
   distance(v1, v2) {
     const side = Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2);
@@ -88,23 +79,26 @@ class Board extends Component {
   }
 
   isClose(v, clickVector) {
-    return this.distance(v, clickVector) < 0.4;
+    const unitLength =
+      this.props.size / (2 * this.props.bound * this.props.bound);
+    return this.distance(v, clickVector) < 0.4 * unitLength;
   }
 
   getClosest(point) {
     //ex: {x:.8, y:.2} => {x:1, y:0}
+    const unitLength =
+      this.props.size / (2 * this.props.bound * this.props.bound); // convert to Redux Grid for rounding niceness
     const resultPoint = {};
     Object.keys(point).forEach(dimension => {
-      resultPoint[dimension] = Math.round(point[dimension]);
+      resultPoint[dimension] =
+        Math.round(point[dimension] / unitLength) * unitLength;
     });
     return resultPoint;
   }
 
   validatePoint(newPoint, oldPoint) {
     const maybeResult = this.getClosest(newPoint);
-    const result = this.isClose(maybeResult, newPoint)
-      ? scaleVector(maybeResult, this.props.size / 12)
-      : oldPoint;
+    const result = this.isClose(maybeResult, newPoint) ? maybeResult : oldPoint;
     return result;
   }
   isPlayerAtOrigin(player) {
@@ -138,19 +132,21 @@ class Board extends Component {
         width={size}
         xmlns="http://www.w3.org/2000/svg"
         onMouseDown={this.handleDown}
+        // onMouseDown={this.debug}
         onMouseMove={this.handleMove}
         onMouseUp={this.handleUp}
-        style={{backgroundColor: 'cyan'}}
+        // onClick={this.debug}
+        style={{backgroundColor: 'black'}}
       >
         <g transform={`translate(${size / 2} ${size / 2})`}>
           {/* Base grid for reference */}
-          <Grid i={baseI} j={baseJ} color="ddd" bound={3} />
+          <Grid i={baseI} j={baseJ} color="444" bound={3} />
 
           {/* Grid that player can bend */}
-          <Grid i={i} j={j} color="black" bound={3} />
+          <Grid i={i} j={j} color="white" bound={3} />
 
           {/* Designate Origin */}
-          <circle cx="0" cy="0" r="3" fill="blue" />
+          <circle cx="0" cy="0" r="4" fill="blue" />
 
           <Door x={door.x} y={door.y} />
           {blocks.map(block => {
@@ -249,7 +245,8 @@ function scaleVectorToGridSize(vector, size, bound) {
 }
 function scaleVectorFromGridSize(vector, size, bound) {
   const scaleFactor = 2 * bound * bound / size; //see size reducer
-  return scaleVector(vector, Math.round(scaleFactor));
+  const result = scaleVector(vector, scaleFactor);
+  return result;
 }
 
 function scaleVector(vector, scalar) {
