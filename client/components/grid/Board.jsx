@@ -1,16 +1,17 @@
-import React, {Component} from 'react'
-import PropTypes from 'prop-types'
-import Grid from './Grid'
-import Arrow from './Arrow'
-import {Player} from '../'
-import {connect} from 'react-redux'
-import Block from './Block'
-import {setI} from '../../store/i'
-import {setJ} from '../../store/j'
-import Door from './Door'
-import Key from './Key'
-import Switch from './Switch'
-import Socket from './Socket'
+import React, {Component} from 'react';
+import PropTypes from 'prop-types';
+import Grid from './Grid';
+import Arrow from './Arrow';
+import {Player} from '../';
+import {connect} from 'react-redux';
+import Block from './Block';
+import {setI} from '../../store/i';
+import {setJ} from '../../store/j';
+import Door from './Door';
+import Key from './Key';
+import Switch from './Switch';
+import Socket from './Socket';
+import I from './I';
 
 /*
  * Component
@@ -18,15 +19,15 @@ import Socket from './Socket'
 
 class Board extends Component {
   constructor(props) {
-    super(props)
+    super(props);
 
     this.state = {
       isDragging: false,
       vector: ''
-    }
-    this.handleMove = this.handleMove.bind(this)
-    this.handleDown = this.handleDown.bind(this)
-    this.handleUp = this.handleUp.bind(this)
+    };
+    this.handleMove = this.handleMove.bind(this);
+    this.handleDown = this.handleDown.bind(this);
+    this.handleUp = this.handleUp.bind(this);
   }
 
   /*
@@ -35,32 +36,36 @@ class Board extends Component {
 
   handleDown(event) {
     //convert event vals into coord
-    const player = this.props.player
-    const name = event.target.className.baseVal
+    const player = this.props.player;
+    const name = event.target.className.baseVal;
     if (name === 'i-point' && this.isPlayerAtOrigin(this.props.player)) {
-      this.setState({isDragging: true, oldPoint: this.props.i, vector: 'i'})
+      this.setState({isDragging: true, oldPoint: this.props.i, vector: 'i'});
     } else if (name === 'j-point' && this.isPlayerAtOrigin(player)) {
-      this.setState({isDragging: true, oldPoint: this.props.j, vector: 'j'})
+      this.setState({isDragging: true, oldPoint: this.props.j, vector: 'j'});
     }
   }
   handleMove(event) {
     if (this.state.isDragging && event.target.className.baseVal === 'board') {
-      const clickVector = this.getVector(event)
-      this.props.setVector(this.state.vector, clickVector)
+      const clickVector = this.getVector(event);
+      this.props.setVector(this.state.vector, clickVector);
     }
   }
   handleUp(event) {
     if (this.state.vector) {
-      const clickVector = this.props[this.state.vector]
+      const clickVector = this.props[this.state.vector];
       //scaling because validatePoint is easier when it's the redux coordinate
-      const scaledVector = scaleVector(clickVector, 12 / this.props.size)
-      const newPoint = this.validatePoint(scaledVector, this.state.oldPoint, {}) //board
-      this.props.setVector(this.state.vector, newPoint)
+      const scaledVector = scaleVector(clickVector, 12 / this.props.size);
+      const newPoint = this.validatePoint(
+        scaledVector,
+        this.state.oldPoint,
+        {}
+      ); //board
+      this.props.setVector(this.state.vector, newPoint);
     }
     this.setState({
       isDragging: false,
       vector: ''
-    })
+    });
   }
 
   /*
@@ -68,42 +73,42 @@ class Board extends Component {
  */
   getVector(event) {
     //expects to be run from the overall board object for the right offset
-    const rect = event.target.getBoundingClientRect()
-    const clickPositionX = event.clientX - rect.left
-    const clickPositionY = event.clientY - rect.top
-    const size = this.props.size
-    const x = clickPositionX - size / 2
-    const y = size / 2 - clickPositionY
-    const vector = {x, y}
-    return vector
+    const rect = event.target.getBoundingClientRect();
+    const clickPositionX = event.clientX - rect.left;
+    const clickPositionY = event.clientY - rect.top;
+    const size = this.props.size;
+    const x = clickPositionX - size / 2;
+    const y = size / 2 - clickPositionY;
+    const vector = {x, y};
+    return vector;
   }
   distance(v1, v2) {
-    const side = Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)
-    return Math.pow(side, 0.5)
+    const side = Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2);
+    return Math.pow(side, 0.5);
   }
 
   isClose(v, clickVector) {
-    return this.distance(v, clickVector) < 0.4
+    return this.distance(v, clickVector) < 0.4;
   }
 
   getClosest(point) {
     //ex: {x:.8, y:.2} => {x:1, y:0}
-    const resultPoint = {}
+    const resultPoint = {};
     Object.keys(point).forEach(dimension => {
-      resultPoint[dimension] = Math.round(point[dimension])
-    })
-    return resultPoint
+      resultPoint[dimension] = Math.round(point[dimension]);
+    });
+    return resultPoint;
   }
 
   validatePoint(newPoint, oldPoint) {
-    const maybeResult = this.getClosest(newPoint)
+    const maybeResult = this.getClosest(newPoint);
     const result = this.isClose(maybeResult, newPoint)
       ? scaleVector(maybeResult, this.props.size / 12)
-      : oldPoint
-    return result
+      : oldPoint;
+    return result;
   }
   isPlayerAtOrigin(player) {
-    return player.x === 0 && player.y === 0
+    return player.x === 0 && player.y === 0;
   }
 
   /*
@@ -113,9 +118,10 @@ class Board extends Component {
   render() {
     const {
       size,
-      bound,
       i,
       j,
+      baseI,
+      baseJ,
       player,
       blocks,
       door,
@@ -124,11 +130,7 @@ class Board extends Component {
       winsWithSwitch,
       levelSwitch,
       socket
-    } = this.props
-    console.log(levelSwitch)
-    const playerX = player.x
-    const playerY = player.y
-    const quadrantLength = size / 2
+    } = this.props;
     return (
       <svg
         className="board"
@@ -138,15 +140,11 @@ class Board extends Component {
         onMouseDown={this.handleDown}
         onMouseMove={this.handleMove}
         onMouseUp={this.handleUp}
+        style={{backgroundColor: 'cyan'}}
       >
-        <g transform={`translate(${quadrantLength} ${quadrantLength})`}>
+        <g transform={`translate(${size / 2} ${size / 2})`}>
           {/* Base grid for reference */}
-          <Grid
-            i={scaleVector({x: 1, y: 0}, Math.round(size / 12))}
-            j={scaleVector({x: 0, y: 1}, Math.round(size / 12))}
-            color="ddd"
-            bound={3}
-          />
+          <Grid i={baseI} j={baseJ} color="ddd" bound={3} />
 
           {/* Grid that player can bend */}
           <Grid i={i} j={j} color="black" bound={3} />
@@ -163,7 +161,7 @@ class Board extends Component {
                 y={block.y}
                 size={Math.round(size / 20)}
               />
-            )
+            );
           })}
 
           {/* Decide wether to load key or switch depending on level */}
@@ -172,8 +170,7 @@ class Board extends Component {
           {winsWithSwitch && <Socket x={socket.x} y={socket.y} />}
 
           {/* i and j vectors */}
-          <Arrow
-            name="i"
+          <I
             x={i.x}
             y={i.y}
             color={this.isPlayerAtOrigin(player) ? '0f0' : '0a0'}
@@ -185,83 +182,106 @@ class Board extends Component {
             color={this.isPlayerAtOrigin(player) ? 'f00' : 'a00'}
           />
 
-          <Player x={playerX} y={playerY} />
+          <Player x={player.x} y={player.y} />
         </g>
       </svg>
-    )
+    );
   }
 }
 
-function scaleVector(vector, scalar) {
-  if (!vector) return {}
-  const newVector = {}
-  Object.keys(vector).forEach(dimension => {
-    newVector[dimension] = vector[dimension] * scalar
-  })
-  return newVector
-}
-
-function matrixMultiply(point, i, j) {
-  if (!point) return {}
-  const newI = scaleVector(i, point.i)
-  const newJ = scaleVector(j, point.j)
-  return {
-    x: newI.x + newJ.x,
-    y: newI.y + newJ.y
-  }
-}
+/*
+ * Container
+ */
 
 const mapState = state => {
-  const size = state.size
-  const switchAsXY = matrixMultiply(state.level.switch, state.i, state.j)
+  const {size, bound} = state;
+  const switchAsXY = matrixMultiply(state.level.switch, state.i, state.j);
+  const scaleVectorToThisGridSize = vector =>
+    scaleVectorToGridSize(vector, size, bound);
   return {
-    i: scaleVector(state.i, Math.round(size / 12)),
-    j: scaleVector(state.j, Math.round(size / 12)),
-    player: scaleVector(state.player, Math.round(size / 12)),
+    i: scaleVectorToThisGridSize(state.i),
+    j: scaleVectorToThisGridSize(state.j),
+    baseI: scaleVectorToThisGridSize({x: 1, y: 0}),
+    baseJ: scaleVectorToThisGridSize({x: 0, y: 1}),
+    player: scaleVectorToThisGridSize(state.player),
     // playerX: state.player.x,
     // playerY: state.player.y,
-    blocks: state.level.blocks.map(block =>
-      scaleVector(block, Math.round(size / 12))
-    ),
-    levelKey: scaleVector(state.level.key, Math.round(size / 12)),
-    door: scaleVector(state.level.door, Math.round(size / 12)),
+    blocks: state.level.blocks.map(block => scaleVectorToThisGridSize(block)),
+    levelKey: scaleVectorToThisGridSize(state.level.key),
+    door: scaleVectorToThisGridSize(state.level.door),
     hasKey: state.level.hasKey,
     hasWon: state.level.hasWon,
     size,
     bound: state.bound,
     winsWithSwitch: !!state.level.winsWithSwitch,
-    levelSwitch: scaleVector(switchAsXY, Math.round(size / 12)),
-    socket: scaleVector(state.level.socket, Math.round(size / 12))
-  }
-}
+    levelSwitch: scaleVectorToThisGridSize(switchAsXY),
+    socket: scaleVectorToThisGridSize(state.level.socket)
+  };
+};
 
 const mapDispatch = dispatch => {
   return {
     setVector: (name, oldVector) =>
       dispatch((_, getState) => {
-        const vector = scaleVector(oldVector, 12 / getState().size)
+        const vector = scaleVectorFromGridSize(
+          oldVector,
+          getState().size,
+          getState().bound
+        );
         if (name === 'i') {
-          dispatch(setI(vector.x, vector.y))
+          dispatch(setI(vector.x, vector.y));
         } else if (name === 'j') {
-          dispatch(setJ(vector.x, vector.y))
+          dispatch(setJ(vector.x, vector.y));
         }
       })
-  }
+  };
+};
+
+export default connect(mapState, mapDispatch)(Board);
+
+/*
+ * HelperFunctions
+ */
+
+function scaleVectorToGridSize(vector, size, bound) {
+  const scaleFactor = size / (2 * bound * bound); //see size reducer
+  return scaleVector(vector, scaleFactor);
+}
+function scaleVectorFromGridSize(vector, size, bound) {
+  const scaleFactor = 2 * bound * bound / size; //see size reducer
+  return scaleVector(vector, Math.round(scaleFactor));
 }
 
-export default connect(mapState, mapDispatch)(Board)
+function scaleVector(vector, scalar) {
+  if (!vector) return {};
+  const newVector = {};
+  Object.keys(vector).forEach(dimension => {
+    newVector[dimension] = vector[dimension] * scalar;
+  });
+  return newVector;
+}
+
+function matrixMultiply(point, i, j) {
+  if (!point) return {};
+  const newI = scaleVector(i, point.i);
+  const newJ = scaleVector(j, point.j);
+  return {
+    x: newI.x + newJ.x,
+    y: newI.y + newJ.y
+  };
+}
 
 /*
  * Prop Settings
  */
 
-Board.defaultProps = {
-  i: {x: 1, y: 0},
-  j: {x: 0, y: 1},
-  playerX: 0,
-  playerY: 0,
-  size: 600
-}
+// Board.defaultProps = {
+//   i: {x: 1, y: 0},
+//   j: {x: 0, y: 1},
+//   playerX: 0,
+//   playerY: 0,
+//   size: 600
+// };
 
 // Board.propTypes = {
 //   i: PropTypes.object,
