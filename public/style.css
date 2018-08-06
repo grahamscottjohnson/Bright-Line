@@ -1,5 +1,7 @@
 body {
   font-family: sans-serif;
+  background-color: black;
+  color: white;
 }
 
 a {
@@ -20,11 +22,69 @@ form div {
   display: inline-block;
 }
 
-.board {
+.center {
   display: block;
   margin: auto;
+  text-align: center;
 }
 
-.player {
-  z-index: 1;
+.levelButton-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.levelButton {
+  height: 40px;
+  width: 60px;
+  background-color: #33adff;
+  border-radius: 10%;
+  font-size: 20px;
+}
+
+@keyframes rotate1 {
+  0% {
+    transform: rotate3d(-7, 5, 2, 0);
+  }
+  50% {
+    transform: rotate3d(-7, 5, 2, 180deg);
+  }
+  100% {
+    transform: rotate3d(-7, 5, 2, 360deg);
+  }
+}
+
+@keyframes rotate2 {
+  0% {
+    transform: rotate3d(-3, -2, 3, 0);
+  }
+  50% {
+    transform: rotate3d(-3, -2, 3, 180deg);
+  }
+  100% {
+    transform: rotate3d(-3, -2, 3, 360deg);
+  }
+}
+
+@keyframes rotate3 {
+  0% {
+    transform: rotate3d(1, 8, -5, 0);
+  }
+  50% {
+    transform: rotate3d(1, 8, -5, 180deg);
+  }
+  100% {
+    transform: rotate3d(1, 8, -5, 360deg);
+  }
+}
+
+.ring1 {
+  animation: rotate1 1.4323s linear infinite;
+}
+
+.ring2 {
+  animation: rotate2 1.88232s linear infinite;
+}
+
+.ring3 {
+  animation: rotate3 1s linear infinite;
 }

@@ -11,7 +11,7 @@ import Door from './Door';
 import Key from './Key';
 import Switch from './Switch';
 import Socket from './Socket';
-import I from './I';
+import {dispatchWithUpdateLevel} from '../../store/level';
 
 /*
  * Component
@@ -123,11 +123,12 @@ class Board extends Component {
       hasKey,
       winsWithSwitch,
       levelSwitch,
-      socket
+      socket,
+      switchUnlocked
     } = this.props;
     return (
       <svg
-        className="board"
+        className="center"
         height={size}
         width={size}
         xmlns="http://www.w3.org/2000/svg"
@@ -140,15 +141,11 @@ class Board extends Component {
       >
         <g transform={`translate(${size / 2} ${size / 2})`}>
           {/* Base grid for reference */}
-          <Grid i={baseI} j={baseJ} color="444" bound={3} />
+          <Grid i={baseI} j={baseJ} color="333" bound={3} />
 
           {/* Grid that player can bend */}
           <Grid i={i} j={j} color="white" bound={3} />
 
-          {/* Designate Origin */}
-          <circle cx="0" cy="0" r="4" fill="blue" />
-
-          <Door x={door.x} y={door.y} />
           {blocks.map(block => {
             return (
               <Block
@@ -160,13 +157,19 @@ class Board extends Component {
             );
           })}
 
+          {/* Designate Origin */}
+          <circle cx="0" cy="0" r="4" fill="blue" />
+
+          <Door x={door.x} y={door.y} hasKey={hasKey || switchUnlocked} />
+
           {/* Decide wether to load key or switch depending on level */}
           {!winsWithSwitch && !hasKey && <Key x={levelKey.x} y={levelKey.y} />}
           {winsWithSwitch && <Switch x={levelSwitch.x} y={levelSwitch.y} />}
           {winsWithSwitch && <Socket x={socket.x} y={socket.y} />}
 
           {/* i and j vectors */}
-          <I
+          <Arrow
+            name="i"
             x={i.x}
             y={i.y}
             color={this.isPlayerAtOrigin(player) ? '0f0' : '0a0'}
@@ -211,7 +214,8 @@ const mapState = state => {
     bound: state.bound,
     winsWithSwitch: !!state.level.winsWithSwitch,
     levelSwitch: scaleVectorToThisGridSize(switchAsXY),
-    socket: scaleVectorToThisGridSize(state.level.socket)
+    socket: scaleVectorToThisGridSize(state.level.socket),
+    switchUnlocked: state.level.switchUnlocked
   };
 };
 
@@ -225,9 +229,20 @@ const mapDispatch = dispatch => {
           getState().bound
         );
         if (name === 'i') {
-          dispatch(setI(vector.x, vector.y));
+          dispatch(
+            dispatchWithUpdateLevel(
+              setI(vector.x, vector.y),
+              {x: vector.x, y: vector.y},
+              getState().j
+            )
+          );
         } else if (name === 'j') {
-          dispatch(setJ(vector.x, vector.y));
+          dispatch(
+            dispatchWithUpdateLevel(setJ(vector.x, vector.y), getState().i, {
+              x: vector.x,
+              y: vector.y
+            })
+          );
         }
       })
   };
