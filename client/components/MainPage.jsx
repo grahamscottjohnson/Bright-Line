@@ -14,9 +14,10 @@ class MainPage extends Component {
       inGame: false,
       level: 0,
       game: {},
-      //unsubscriber
       levels: [],
       unlocked: +localStorage.getItem('unlocked') || 0
+      //unsubscriber
+      //isTransitioning (to properly fade and then load the next game)
     };
     this.handleClickToGame = this.handleClickToGame.bind(this);
     this.handleClickToMenu = this.handleClickToMenu.bind(this);
@@ -38,24 +39,35 @@ class MainPage extends Component {
   }
 
   handleClickToGame(num) {
-    const state = this.state;
+    let state = this.state;
     const game = makeStore(state.levels[num], 576);
     const unsubscriber = game.subscribe(() => {
       if (game.getState().level.hasWon) {
-        unsubscriber();
+        //unlock the next level
         let newUnlocked = state.unlocked;
-        console.log(num, state.unlocked);
         if (num === state.unlocked && state.unlocked < 9) {
-          console.log(`passed if statement`);
           newUnlocked += 1;
           localStorage.setItem('unlocked', newUnlocked);
         }
-        this.setState({
-          ...state,
-          inGame: false,
-          unlocked: newUnlocked,
-          game: {}
-        });
+        state = this.state;
+        //let game fadeout
+        setTimeout(() => {
+          unsubscriber();
+          this.setState({
+            ...state,
+            isTransitioning: true,
+            unlocked: newUnlocked
+          });
+        }, 200);
+        //make new Game if one exists
+        setTimeout(() => {
+          if (num + 1 === this.state.levels.length) {
+            state = this.state;
+            this.setState({...state, inGame: false, isTransitioning: false});
+          } else {
+            this.handleClickToGame(num + 1);
+          }
+        }, 210);
       }
     });
     this.setState({
@@ -63,7 +75,8 @@ class MainPage extends Component {
       inGame: true,
       game,
       unsubscriber,
-      level: num
+      level: num,
+      isTransitioning: false
     });
   }
   handleClickToMenu() {
@@ -108,20 +121,23 @@ class MainPage extends Component {
   render() {
     return (
       <div>
-        {this.state.inGame ? (
-          <GamePage
-            game={this.state.game}
-            backToMenu={this.handleClickToMenu}
-            movePlayer={this.movePlayer}
-            level={this.state.levels[this.state.level]}
-          />
-        ) : (
-          <TitlePage
-            numLevels={9}
-            unlocked={this.state.unlocked}
-            goToLevel={this.handleClickToGame}
-          />
-        )}
+        {this.state.inGame &&
+          !this.state.isTransitioning && (
+            <GamePage
+              game={this.state.game}
+              backToMenu={this.handleClickToMenu}
+              movePlayer={this.movePlayer}
+              level={this.state.levels[this.state.level]}
+            />
+          )}
+        {!this.state.inGame &&
+          !this.state.isTransitioning && (
+            <TitlePage
+              numLevels={9}
+              unlocked={this.state.unlocked}
+              goToLevel={this.handleClickToGame}
+            />
+          )}
       </div>
     );
   }

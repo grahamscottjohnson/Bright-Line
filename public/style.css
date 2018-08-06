@@ -91,6 +91,14 @@ form div {
     transform: rotate3d(1, 8, -5, 360deg);
   }
 }
+@keyframes fadeout {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 
 .ring1 {
   animation: rotate1 1.4323s linear infinite;
@@ -102,4 +110,8 @@ form div {
 
 .ring3 {
   animation: rotate3 1s linear infinite;
+}
+
+.fadeOut {
+  animation: fadeout 0.2s linear forwards;
 }

@@ -25,6 +25,7 @@ export default class GamePage extends Component {
               movePlayer(event, game);
             }}
             id="board-container"
+            className={level.hasWon ? 'fadeOut' : ''}
           >
             <Board level={level} />
           </div>

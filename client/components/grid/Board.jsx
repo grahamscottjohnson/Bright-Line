@@ -12,7 +12,7 @@ import Key from './Key';
 import Switch from './Switch';
 import Socket from './Socket';
 import {dispatchWithUpdateLevel} from '../../store/level';
-
+import PlayerPresentation from './PlayerPresentation';
 /*
  * Component
  */
@@ -112,6 +112,7 @@ class Board extends Component {
   render() {
     const {
       size,
+      bound,
       i,
       j,
       baseI,
@@ -124,11 +125,13 @@ class Board extends Component {
       winsWithSwitch,
       levelSwitch,
       socket,
-      switchUnlocked
+      switchUnlocked,
+      hasWon
     } = this.props;
+
     return (
       <svg
-        className="center"
+        className={`center${hasWon ? ' fadeOut' : ''}`}
         height={size}
         width={size}
         xmlns="http://www.w3.org/2000/svg"
@@ -182,6 +185,11 @@ class Board extends Component {
           />
 
           <Player x={player.x} y={player.y} />
+          {/* <PlayerPresentation
+            x={player.x}
+            y={player.y}
+            size={size / (2 * bound * bound)}
+          /> */}
         </g>
       </svg>
     );

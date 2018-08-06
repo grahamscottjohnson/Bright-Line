@@ -11,7 +11,7 @@ const TitlePage = ({numLevels, goToLevel, unlocked}) => {
     <div>
       <h1 className="center">Bright Line</h1>
       <div className="center verticalMargin">
-        <PlayerPresentation />
+        <PlayerPresentation size={100} />
       </div>
       <p className="center verticalMargin">Levels</p>
       <div className="levelButton-container">
