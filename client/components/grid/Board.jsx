@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import Grid from './Grid';
 import Arrow from './Arrow';
-import {Player} from '../';
+import {Player} from '..';
 import {connect} from 'react-redux';
 import Block from './Block';
 import {setI} from '../../store/i';

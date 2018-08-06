@@ -27,18 +27,33 @@ form div {
   margin: auto;
   text-align: center;
 }
+.verticalMargin {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
 
 .levelButton-container {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
+}
+.levelButton-container > * {
+  margin: 5px;
 }
 
 .levelButton {
-  height: 40px;
-  width: 60px;
+  padding: 5px 15px;
   background-color: #33adff;
-  border-radius: 10%;
+  border-radius: 8px;
   font-size: 20px;
+}
+.restricted {
+  opacity: 0.6;
+}
+
+#board-container:focus {
+  outline: none;
+  background-color: '222';
 }
 
 @keyframes rotate1 {

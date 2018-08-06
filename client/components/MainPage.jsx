@@ -1,11 +1,10 @@
-import React, {Component, Fragment} from 'react';
-import Board from './grid/Board';
+import React, {Component} from 'react';
 import axios from 'axios';
-import {setLevel, dispatchWithUpdateLevel} from '../store/level';
-import {Provider, connect} from 'react-redux';
+import {dispatchWithUpdateLevel} from '../store/level';
 import makeStore from '../store';
 import {moveIBackwards, moveI, moveJ, moveJBackwards} from '../store/player';
-import PlayerPresentation from './grid/PlayerPresentation';
+import GamePage from './GamePage';
+import TitlePage from './TitlePage';
 
 class MainPage extends Component {
   constructor(props) {
@@ -17,12 +16,16 @@ class MainPage extends Component {
       game: {},
       //unsubscriber
       levels: [],
-      isFetching: true
+      unlocked: +localStorage.getItem('unlocked') || 0
     };
+    this.handleClickToGame = this.handleClickToGame.bind(this);
+    this.handleClickToMenu = this.handleClickToMenu.bind(this);
   }
 
   async componentDidMount() {
-    const numLevels = 8;
+    //load all the levels from the server
+    const numLevels = 9;
+    const state = this.state;
     const levelNums = [];
     for (let i = 0; i <= numLevels; i += 1) {
       levelNums.push(i);
@@ -31,25 +34,32 @@ class MainPage extends Component {
       levelNums.map(num => axios(`/levels/${num}.json`))
     );
     const levels = responses.map(response => response.data);
-    const state = this.state;
-    this.setState({...state, levels, isFetching: false});
+    this.setState({...state, levels});
   }
 
   handleClickToGame(num) {
     const state = this.state;
-    const game = makeStore(state.levels[num]);
+    const game = makeStore(state.levels[num], 576);
     const unsubscriber = game.subscribe(() => {
       if (game.getState().level.hasWon) {
         unsubscriber();
+        let newUnlocked = state.unlocked;
+        console.log(num, state.unlocked);
+        if (num === state.unlocked && state.unlocked < 9) {
+          console.log(`passed if statement`);
+          newUnlocked += 1;
+          localStorage.setItem('unlocked', newUnlocked);
+        }
         this.setState({
+          ...state,
           inGame: false,
-          levels: state.levels,
-          level: 0,
-          isFetching: false
+          unlocked: newUnlocked,
+          game: {}
         });
       }
     });
     this.setState({
+      ...state,
       inGame: true,
       game,
       unsubscriber,
@@ -57,7 +67,7 @@ class MainPage extends Component {
     });
   }
   handleClickToMenu() {
-    this.setState({...this.state, inGame: false, game: {}, level: 0});
+    this.setState({...this.state, inGame: false, game: {}});
   }
   movePlayer(event, store) {
     const {i, j, level, bound} = store.getState();
@@ -96,51 +106,24 @@ class MainPage extends Component {
   }
 
   render() {
-    const numLevels = 8;
-    const levelNums = [];
-    for (let i = 0; i <= numLevels; i += 1) {
-      levelNums.push(i);
-    }
-    const titlePage = (
+    return (
       <div>
-        <h1 className="center">Bright Line</h1>
-        <div className="center">
-          <PlayerPresentation />
-        </div>
-        <p className="center">Levels</p>
-        <div className="levelButton-container">
-          {levelNums.map(num => {
-            return (
-              <button
-                className="levelButton"
-                onClick={() => this.handleClickToGame(num)}
-                key={num}
-              >
-                {num}
-              </button>
-            );
-          })}
-        </div>
+        {this.state.inGame ? (
+          <GamePage
+            game={this.state.game}
+            backToMenu={this.handleClickToMenu}
+            movePlayer={this.movePlayer}
+            level={this.state.levels[this.state.level]}
+          />
+        ) : (
+          <TitlePage
+            numLevels={9}
+            unlocked={this.state.unlocked}
+            goToLevel={this.handleClickToGame}
+          />
+        )}
       </div>
     );
-    const gamePage = (
-      <Fragment>
-        <Provider store={this.state.game}>
-          <div
-            tabIndex="0"
-            onKeyDown={event => {
-              this.movePlayer(event, this.state.game);
-            }}
-          >
-            <Board level={this.state.levels[this.state.level]} />
-          </div>
-        </Provider>
-        <button className="center" onClick={() => this.handleClickToMenu()}>
-          Back to Menu
-        </button>
-      </Fragment>
-    );
-    return <div>{this.state.inGame ? gamePage : titlePage}</div>;
   }
 }
 

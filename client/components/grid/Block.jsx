@@ -15,7 +15,7 @@ const Block = ({x, y, blockSize}) => {
 const mapState = state => {
   const unitLength = state.size / (2 * state.bound * state.bound);
   return {
-    blockSize: 2 * unitLength
+    blockSize: 2 * unitLength - 2
   };
 };
 

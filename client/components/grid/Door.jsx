@@ -2,7 +2,6 @@ import React from 'react';
 import {connect} from 'react-redux';
 
 const Door = ({x, y, doorSize, hasKey}) => {
-  console.log(hasKey);
   return (
     <g>
       <rect
